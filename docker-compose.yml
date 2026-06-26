@@ -1,0 +1,11 @@
+name: portal-conecta-observability
+
+networks:
+  observability:
+    name: portal-conecta-observability
+
+volumes:
+  grafana-data:
+  prometheus-data:
+  loki-data:
+  tempo-data:

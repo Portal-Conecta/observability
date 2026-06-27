@@ -38,4 +38,6 @@ Para entrar na stack local, cada serviço deve:
 
 ## Próximos passos
 
-O `hub` será o primeiro target funcional da stack. Os demais serviços devem ser ativados no Alloy e nos dashboards somente depois de completarem o contrato mínimo de observabilidade.
+A stack local já sobe com Grafana, Loki, Prometheus, Tempo e Alloy sem exigir que os serviços do Portal Conecta estejam rodando.
+
+O `hub` será o primeiro target funcional da coleta. Os demais serviços devem ser ativados no Alloy e nos dashboards somente depois de completarem o contrato mínimo de observabilidade.

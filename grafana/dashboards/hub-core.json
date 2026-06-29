@@ -343,22 +343,16 @@
           "legendFormat": "p95 {{uri}}",
           "range": true,
           "refId": "A"
-        },
-        {
-          "datasource": "Prometheus",
-          "editorMode": "code",
-          "expr": "1000 * histogram_quantile(0.50, sum by (le, uri) (rate(http_server_requests_seconds_bucket{service=\"$service\", environment=\"$environment\"}[$__rate_interval])))",
-          "hide": true,
-          "legendFormat": "p50 {{uri}}",
-          "range": true,
-          "refId": "B"
         }
       ],
       "title": "LatÃªncia HTTP",
       "type": "timeseries"
     },
     {
-      "datasource": "Loki",
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -379,10 +373,13 @@
       "pluginVersion": "12.0.0",
       "targets": [
         {
-          "datasource": "Loki",
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{service=\"$service\", environment=\"$environment\"} |~ \"$correlationId\"",
+          "expr": "{service=\"$service\", environment=\"$environment\"} |= `$correlationId`",
           "queryType": "range",
           "refId": "A"
         }
@@ -492,6 +489,60 @@
         }
       ],
       "title": "Traces do Hub Core",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 8,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{service=\"$service\", environment=\"$environment\"} |= `$correlationId`",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Busca por correlationId",
       "type": "table"
     }
   ],

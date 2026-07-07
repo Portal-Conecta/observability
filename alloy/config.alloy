@@ -22,6 +22,9 @@ otelcol.receiver.otlp "local" {
 }
 
 otelcol.processor.batch "default" {
+  timeout         = "1s"
+  send_batch_size = 256
+
   output {
     traces = [otelcol.exporter.otlp.tempo.input]
   }

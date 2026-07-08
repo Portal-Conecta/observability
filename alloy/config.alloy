@@ -59,19 +59,19 @@ prometheus.scrape "hub" {
 // Targets futuros — desativados até completarem o contrato de observabilidade
 // Para ativar: descomentar o bloco e garantir que o serviço expõe /actuator/prometheus
 //
-// prometheus.scrape "api_gateway" {
-//   targets = [
-//     {
-//       __address__ = env("GATEWAY_METRICS_TARGET"),
-//       service     = "api-gateway",
-//       environment = env("PORTAL_ENVIRONMENT"),
-//     },
-//   ]
-//   metrics_path    = "/actuator/prometheus"
-//   scrape_interval = "15s"
-//   forward_to      = [prometheus.remote_write.local.receiver]
-// }
-//
+prometheus.scrape "api_gateway" {
+  targets = [
+    {
+      __address__ = env("GATEWAY_METRICS_TARGET"),
+      service     = "api-gateway",
+      environment = env("PORTAL_ENVIRONMENT"),
+    },
+  ]
+  metrics_path    = "/actuator/prometheus"
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.local.receiver]
+}
+
 // prometheus.scrape "checklist" {
 //   targets = [
 //     {

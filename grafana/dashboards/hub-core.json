@@ -42,7 +42,7 @@
       "title": "Explorar traces do Hub Core",
       "tooltip": "Abrir Explore no Tempo para consultar traces do Hub Core",
       "type": "link",
-      "url": "/explore?left={\"datasource\":\"tempo\",\"queries\":[{\"refId\":\"A\",\"queryType\":\"traceql\",\"query\":\"{resource.service.name=\\\"$service\\\"}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}"
+      "url": "/explore?left={\"datasource\":\"P214B5B846CF3925F\",\"queries\":[{\"refId\":\"A\",\"queryType\":\"traceql\",\"query\":\"{resource.service.name=\\\"$service\\\"}\"}],\"range\":{\"from\":\"$__from\",\"to\":\"$__to\"}}"
     }
   ],
   "liveNow": false,
@@ -446,7 +446,10 @@
       "type": "table"
     },
     {
-      "datasource": "Tempo",
+      "datasource": {
+        "type": "tempo",
+        "uid": "P214B5B846CF3925F"
+      },
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -482,7 +485,10 @@
       "pluginVersion": "12.0.0",
       "targets": [
         {
-          "datasource": "Tempo",
+          "datasource": {
+            "type": "tempo",
+            "uid": "P214B5B846CF3925F"
+          },
           "query": "{resource.service.name=\"$service\"}",
           "queryType": "traceql",
           "refId": "A"

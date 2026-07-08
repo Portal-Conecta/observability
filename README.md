@@ -97,3 +97,38 @@ URLs locais:
 O Alloy publica as portas OTLP locais `4317` e `4318` e encaminha traces para o Tempo pela rede Docker. A coleta real de logs, métricas do Hub Core e dashboards será configurada nas próximas issues.
 
 Se a porta `3000` já estiver ocupada, altere `GRAFANA_PORT` no `.env` local antes de subir a stack.
+
+## Validar traces localmente
+
+Suba a stack completa pelo compose da raiz do workspace, para que `core`, `api-gateway`, Alloy e Tempo compartilhem a mesma rede Docker:
+
+```powershell
+docker compose --profile observability up -d
+```
+
+Confira se Tempo e Alloy estao prontos:
+
+```powershell
+curl.exe -s http://localhost:3200/ready
+curl.exe -s http://localhost:12345/-/ready
+```
+
+Execute um fluxo pelo gateway:
+
+```powershell
+curl.exe --% -i -X POST http://localhost:8081/auth/login -H "Content-Type: application/json" --data "{\"email\":\"admin@portal.test\",\"password\":\"123456\"}"
+```
+
+Aguarde alguns segundos para o batch/export e consulte o Tempo:
+
+```powershell
+curl.exe -s "http://localhost:3200/api/search?tags=service.name%3Dapi-gateway&limit=20"
+curl.exe -s "http://localhost:3200/api/search?tags=service.name%3Dhub&limit=20"
+```
+
+As duas consultas devem retornar pelo menos um trace quando o request passar do gateway para o Hub Core. Se vier vazio, verifique primeiro os logs do Alloy para confirmar recebimento/exportacao OTLP:
+
+```powershell
+docker compose --profile observability logs --tail 100 alloy
+docker compose --profile observability logs --tail 100 tempo
+```

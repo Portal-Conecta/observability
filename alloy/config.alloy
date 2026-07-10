@@ -1,0 +1,157 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+// ============================================================
+// TRACES — OTLP gRPC e HTTP
+// ============================================================
+
+otelcol.receiver.otlp "local" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  output {
+    traces = [otelcol.processor.batch.default.input]
+  }
+}
+
+otelcol.processor.batch "default" {
+  timeout         = "1s"
+  send_batch_size = 256
+
+  output {
+    traces = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+
+    tls {
+      insecure = true
+    }
+  }
+}
+
+prometheus.scrape "hub" {
+  targets = [
+    {
+      __address__ = env("HUB_METRICS_TARGET"),
+      service     = "hub",
+      environment = env("PORTAL_ENVIRONMENT"),
+    },
+  ]
+
+  metrics_path     = "/actuator/prometheus"
+  scrape_interval  = "15s"
+  scrape_timeout   = "10s"
+
+  forward_to = [prometheus.remote_write.local.receiver]
+}
+
+// Targets futuros — desativados até completarem o contrato de observabilidade
+// Para ativar: descomentar o bloco e garantir que o serviço expõe /actuator/prometheus
+//
+prometheus.scrape "api_gateway" {
+  targets = [
+    {
+      __address__ = env("GATEWAY_METRICS_TARGET"),
+      service     = "api-gateway",
+      environment = env("PORTAL_ENVIRONMENT"),
+    },
+  ]
+  metrics_path    = "/actuator/prometheus"
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.local.receiver]
+}
+
+// prometheus.scrape "checklist" {
+//   targets = [
+//     {
+//       __address__ = env("CHECKLIST_METRICS_TARGET"),
+//       service     = "checklist",
+//       environment = env("PORTAL_ENVIRONMENT"),
+//     },
+//   ]
+//   metrics_path    = "/actuator/prometheus"
+//   scrape_interval = "15s"
+//   forward_to      = [prometheus.remote_write.local.receiver]
+// }
+//
+// prometheus.scrape "seat_map" {
+//   targets = [
+//     {
+//       __address__ = env("SEAT_MAP_METRICS_TARGET"),
+//       service     = "seat-map",
+//       environment = env("PORTAL_ENVIRONMENT"),
+//     },
+//   ]
+//   metrics_path    = "/actuator/prometheus"
+//   scrape_interval = "15s"
+//   forward_to      = [prometheus.remote_write.local.receiver]
+// }
+//
+// prometheus.scrape "comunicados" {
+//   targets = [
+//     {
+//       __address__ = env("COMUNICADOS_METRICS_TARGET"),
+//       service     = "comunicados",
+//       environment = env("PORTAL_ENVIRONMENT"),
+//     },
+//   ]
+//   metrics_path    = "/actuator/prometheus"
+//   scrape_interval = "15s"
+//   forward_to      = [prometheus.remote_write.local.receiver]
+// }
+
+prometheus.remote_write "local" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "containers" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    target_label  = "container"
+    regex         = "/(.*)"
+    replacement   = "$1"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_portal_service"]
+    target_label  = "service"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_portal_environment"]
+    target_label  = "environment"
+  }
+}
+
+loki.source.docker "containers" {
+  host    = "unix:///var/run/docker.sock"
+  targets = discovery.relabel.containers.output
+
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

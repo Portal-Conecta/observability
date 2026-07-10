@@ -2,7 +2,7 @@
 
 Repositório de observabilidade local do Portal Conecta.
 
-Esta base prepara a estrutura para receber Grafana, Loki, Prometheus, Tempo e Alloy nas próximas issues. A fundação não sobe containers, não configura coleta e não altera nenhum backend.
+Esta base prepara a estrutura e a stack local mínima com Grafana, Loki, Prometheus, Tempo e Alloy. A stack sobe sem depender dos backends do Portal Conecta e ainda não configura coleta real dos serviços.
 
 ## Objetivo
 
@@ -64,14 +64,71 @@ Consulte `docs/servicos-observados.md` para nomes oficiais, portas locais e stat
 4. Provisionar datasources e dashboard inicial do Hub Core no Grafana.
 5. Conectar os demais serviços conforme eles implementarem o contrato de observabilidade.
 
-## Validação da fundação
+## Stack local
 
 Execute:
 
 ```bash
 docker compose config
+docker compose up -d
+docker compose ps
 ```
 
-A saída esperada deve conter o projeto `portal-conecta-observability`, a rede de observabilidade e os volumes nomeados. Nesta etapa, o Compose não deve definir containers.
+Verifique os logs principais:
 
-Como ainda não existem serviços usando a rede e os volumes, algumas versões do Docker Compose podem omitir esses blocos na saída normalizada. Nesse caso, valide que `services: {}` aparece na saída e que `docker-compose.yml` declara a rede e os volumes esperados.
+```bash
+docker compose logs grafana
+docker compose logs loki
+docker compose logs prometheus
+docker compose logs tempo
+docker compose logs alloy
+```
+
+URLs locais:
+
+| Serviço | URL |
+| --- | --- |
+| Grafana | http://localhost:3000 |
+| Loki | http://localhost:3100/ready |
+| Prometheus | http://localhost:9090/-/ready |
+| Tempo | http://localhost:3200/ready |
+| Alloy | http://localhost:12345 |
+
+O Alloy publica as portas OTLP locais `4317` e `4318` e encaminha traces para o Tempo pela rede Docker. A coleta real de logs, métricas do Hub Core e dashboards será configurada nas próximas issues.
+
+Se a porta `3000` já estiver ocupada, altere `GRAFANA_PORT` no `.env` local antes de subir a stack.
+
+## Validar traces localmente
+
+Suba a stack completa pelo compose da raiz do workspace, para que `core`, `api-gateway`, Alloy e Tempo compartilhem a mesma rede Docker:
+
+```powershell
+docker compose --profile observability up -d
+```
+
+Confira se Tempo e Alloy estao prontos:
+
+```powershell
+curl.exe -s http://localhost:3200/ready
+curl.exe -s http://localhost:12345/-/ready
+```
+
+Execute um fluxo pelo gateway:
+
+```powershell
+curl.exe --% -i -X POST http://localhost:8081/auth/login -H "Content-Type: application/json" --data "{\"email\":\"admin@portal.test\",\"password\":\"123456\"}"
+```
+
+Aguarde alguns segundos para o batch/export e consulte o Tempo:
+
+```powershell
+curl.exe -s "http://localhost:3200/api/search?tags=service.name%3Dapi-gateway&limit=20"
+curl.exe -s "http://localhost:3200/api/search?tags=service.name%3Dhub&limit=20"
+```
+
+As duas consultas devem retornar pelo menos um trace quando o request passar do gateway para o Hub Core. Se vier vazio, verifique primeiro os logs do Alloy para confirmar recebimento/exportacao OTLP:
+
+```powershell
+docker compose --profile observability logs --tail 100 alloy
+docker compose --profile observability logs --tail 100 tempo
+```

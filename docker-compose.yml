@@ -72,6 +72,13 @@ services:
       - loki
       - prometheus
       - tempo
+    environment:
+      PORTAL_ENVIRONMENT: ${PORTAL_ENVIRONMENT:-local}
+      HUB_METRICS_TARGET: ${HUB_METRICS_TARGET:-host.docker.internal:8081}
+      GATEWAY_METRICS_TARGET: ${GATEWAY_METRICS_TARGET:-host.docker.internal:8090}
+      CHECKLIST_METRICS_TARGET: ${CHECKLIST_METRICS_TARGET:-host.docker.internal:8082}
+      SEAT_MAP_METRICS_TARGET: ${SEAT_MAP_METRICS_TARGET:-host.docker.internal:8083}
+      COMUNICADOS_METRICS_TARGET: ${COMUNICADOS_METRICS_TARGET:-host.docker.internal:8084}
     ports:
       - "${ALLOY_UI_PORT:-12345}:12345"
       - "${ALLOY_OTLP_GRPC_PORT:-4317}:4317"

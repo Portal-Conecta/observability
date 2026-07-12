@@ -8,20 +8,20 @@ Este documento registra os serviços previstos para a observabilidade local do P
 | --- | --- | --- | --- |
 | Hub Core | `hub` | `hub` | Referência funcional inicial |
 | API Gateway | `api-gateway` | `api-gateway` | Preparado parcialmente |
-| Checklist | `checklist` | `conecta.checklist` | Pendente de padronização |
-| Mapa de Sala | `seat-map` | `seat-map` | Preparado parcialmente |
-| Comunicados | `comunicados` | `comunicados` | Preparado parcialmente |
+| Checklist | `checklist` | `checklist` | Integrado à observabilidade local |
+| Mapa de Sala | `seat-map` | `seat-map` | Integrado à observabilidade local |
+| Comunicados | `comunicados` | `comunicados` | Integrado à observabilidade local |
 
 ## Portas locais esperadas
 
 | Serviço | Porta local | Observação |
 | --- | --- | --- |
-| `hub` | `8080` | Execução direta por Maven/IDE |
-| `hub` | `8081` | Execução via `docker-compose.all.yml` ou `docker-compose.gateway-core.yml` |
-| `api-gateway` | `8090` | Execução via compose geral/gateway-core |
-| `checklist` | `8082` | Execução via compose geral |
-| `seat-map` | `8083` | Execução via compose geral |
-| `comunicados` | `8084` | Execução via compose geral |
+| `hub` | `8080` | Porta interna do container e execução direta por Maven/IDE |
+| `hub` | `8082` | Porta publicada pelo compose raiz |
+| `api-gateway` | `8081` | Porta publicada pelo compose raiz |
+| `checklist` | `8083` | Porta publicada pelo compose raiz |
+| `seat-map` | `8084` | Porta publicada pelo compose raiz |
+| `comunicados` | `8085` | Porta publicada pelo compose raiz |
 
 ## Contrato mínimo esperado
 
@@ -40,4 +40,13 @@ Para entrar na stack local, cada serviço deve:
 
 A stack local já sobe com Grafana, Loki, Prometheus, Tempo e Alloy sem exigir que os serviços do Portal Conecta estejam rodando.
 
-O `hub` será o primeiro target funcional da coleta. Os demais serviços devem ser ativados no Alloy e nos dashboards somente depois de completarem o contrato mínimo de observabilidade.
+`hub`, `api-gateway`, `checklist`, `seat-map` e `comunicados` estão configurados como targets da observabilidade local.
+
+## Dashboards
+
+| Dashboard | Uso recomendado |
+| --- | --- |
+| Portal Conecta - Visao Geral | Primeira tela de diagnóstico: disponibilidade, HTTP, logs, traces e correlationId por serviço |
+| Portal Conecta - Runtime JVM / Prometheus | Acompanhamento técnico das métricas genéricas do Actuator/Micrometer, como CPU, memória, threads, GC, uptime e scrape |
+
+As variáveis `environment` e `service` são carregadas dinamicamente a partir do Prometheus usando os labels enviados pelo Alloy.

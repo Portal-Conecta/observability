@@ -56,9 +56,6 @@ prometheus.scrape "hub" {
   forward_to = [prometheus.remote_write.local.receiver]
 }
 
-// Targets futuros — desativados até completarem o contrato de observabilidade
-// Para ativar: descomentar o bloco e garantir que o serviço expõe /actuator/prometheus
-//
 prometheus.scrape "api_gateway" {
   targets = [
     {
@@ -72,44 +69,44 @@ prometheus.scrape "api_gateway" {
   forward_to      = [prometheus.remote_write.local.receiver]
 }
 
-// prometheus.scrape "checklist" {
-//   targets = [
-//     {
-//       __address__ = env("CHECKLIST_METRICS_TARGET"),
-//       service     = "checklist",
-//       environment = env("PORTAL_ENVIRONMENT"),
-//     },
-//   ]
-//   metrics_path    = "/actuator/prometheus"
-//   scrape_interval = "15s"
-//   forward_to      = [prometheus.remote_write.local.receiver]
-// }
-//
-// prometheus.scrape "seat_map" {
-//   targets = [
-//     {
-//       __address__ = env("SEAT_MAP_METRICS_TARGET"),
-//       service     = "seat-map",
-//       environment = env("PORTAL_ENVIRONMENT"),
-//     },
-//   ]
-//   metrics_path    = "/actuator/prometheus"
-//   scrape_interval = "15s"
-//   forward_to      = [prometheus.remote_write.local.receiver]
-// }
-//
-// prometheus.scrape "comunicados" {
-//   targets = [
-//     {
-//       __address__ = env("COMUNICADOS_METRICS_TARGET"),
-//       service     = "comunicados",
-//       environment = env("PORTAL_ENVIRONMENT"),
-//     },
-//   ]
-//   metrics_path    = "/actuator/prometheus"
-//   scrape_interval = "15s"
-//   forward_to      = [prometheus.remote_write.local.receiver]
-// }
+prometheus.scrape "checklist" {
+  targets = [
+    {
+      __address__ = env("CHECKLIST_METRICS_TARGET"),
+      service     = "checklist",
+      environment = env("PORTAL_ENVIRONMENT"),
+    },
+  ]
+  metrics_path    = "/actuator/prometheus"
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.local.receiver]
+}
+
+prometheus.scrape "seat_map" {
+  targets = [
+    {
+      __address__ = env("SEAT_MAP_METRICS_TARGET"),
+      service     = "seat-map",
+      environment = env("PORTAL_ENVIRONMENT"),
+    },
+  ]
+  metrics_path    = "/actuator/prometheus"
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.local.receiver]
+}
+
+prometheus.scrape "comunicados" {
+  targets = [
+    {
+      __address__ = env("COMUNICADOS_METRICS_TARGET"),
+      service     = "comunicados",
+      environment = env("PORTAL_ENVIRONMENT"),
+    },
+  ]
+  metrics_path    = "/actuator/prometheus"
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.local.receiver]
+}
 
 prometheus.remote_write "local" {
   endpoint {

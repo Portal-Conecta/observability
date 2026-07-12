@@ -41,3 +41,12 @@ Para entrar na stack local, cada serviço deve:
 A stack local já sobe com Grafana, Loki, Prometheus, Tempo e Alloy sem exigir que os serviços do Portal Conecta estejam rodando.
 
 `hub`, `api-gateway`, `checklist`, `seat-map` e `comunicados` estão configurados como targets da observabilidade local.
+
+## Dashboards
+
+| Dashboard | Uso recomendado |
+| --- | --- |
+| Portal Conecta - Visao Geral | Primeira tela de diagnóstico: disponibilidade, HTTP, logs, traces e correlationId por serviço |
+| Portal Conecta - Runtime JVM / Prometheus | Acompanhamento técnico das métricas genéricas do Actuator/Micrometer, como CPU, memória, threads, GC, uptime e scrape |
+
+As variáveis `environment` e `service` são carregadas dinamicamente a partir do Prometheus usando os labels enviados pelo Alloy.

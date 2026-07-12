@@ -2,7 +2,7 @@
 
 Repositório de observabilidade local do Portal Conecta.
 
-Esta base prepara a estrutura e a stack local mínima com Grafana, Loki, Prometheus, Tempo e Alloy. A stack sobe sem depender dos backends do Portal Conecta e ainda não configura coleta real dos serviços.
+Esta base prepara a estrutura e a stack local mínima com Grafana, Loki, Prometheus, Tempo e Alloy. A stack sobe sem depender dos backends do Portal Conecta e pode coletar métricas, logs e traces dos serviços quando os targets estiverem acessíveis.
 
 ## Objetivo
 
@@ -46,7 +46,7 @@ Centralizar os arquivos de observabilidade da plataforma em um repositório dedi
 
 ## Serviços observáveis
 
-O Hub Core (`hub`) é o primeiro serviço de referência. Os demais serviços devem seguir o mesmo contrato de observabilidade quando completarem a instrumentação necessária:
+Os serviços observados usam nomes oficiais estáveis para filtros de Prometheus, Loki e Tempo:
 
 - `hub`
 - `api-gateway`
@@ -63,6 +63,7 @@ Consulte `docs/servicos-observados.md` para nomes oficiais, portas locais e stat
 3. Configurar Alloy para coletar telemetria do Hub Core.
 4. Provisionar datasources e dashboard inicial do Hub Core no Grafana.
 5. Conectar os demais serviços conforme eles implementarem o contrato de observabilidade.
+6. Evoluir dashboards por domínio quando existirem métricas de negócio além das métricas genéricas do Actuator/Micrometer.
 
 ## Stack local
 
@@ -94,7 +95,14 @@ URLs locais:
 | Tempo | http://localhost:3200/ready |
 | Alloy | http://localhost:12345 |
 
-O Alloy publica as portas OTLP locais `4317` e `4318` e encaminha traces para o Tempo pela rede Docker. A coleta real de logs, métricas do Hub Core e dashboards será configurada nas próximas issues.
+O Alloy publica as portas OTLP locais `4317` e `4318`, encaminha traces para o Tempo e envia métricas dos targets configurados para o Prometheus via remote write.
+
+Os dashboards provisionados são:
+
+| Dashboard | Foco |
+| --- | --- |
+| Portal Conecta - Visao Geral | Saúde, tráfego HTTP, erros, latência, logs e traces por serviço |
+| Portal Conecta - Runtime JVM / Prometheus | CPU, memória JVM, threads, GC, uptime, HTTP e saúde do scrape |
 
 Se a porta `3000` já estiver ocupada, altere `GRAFANA_PORT` no `.env` local antes de subir a stack.
 

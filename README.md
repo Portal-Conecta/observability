@@ -104,7 +104,43 @@ Os dashboards provisionados são:
 | Portal Conecta - Visao Geral | Saúde, tráfego HTTP, erros, latência, logs e traces por serviço |
 | Portal Conecta - Runtime JVM / Prometheus | CPU, memória JVM, threads, GC, uptime, HTTP e saúde do scrape |
 
+O Grafana preinstala os apps de Drilldown para investigacao guiada:
+
+| App | Plugin |
+| --- | --- |
+| Metrics Drilldown | `grafana-metricsdrilldown-app` |
+| Logs Drilldown | `grafana-lokiexplore-app` |
+| Traces Drilldown | `grafana-exploretraces-app` |
+
+Profiles Drilldown nao e habilitado nesta stack porque depende de Pyroscope/profiling, que esta fora do escopo local atual.
+
 Se a porta `3000` já estiver ocupada, altere `GRAFANA_PORT` no `.env` local antes de subir a stack.
+
+## Validar Drilldown localmente
+
+Depois de atualizar a configuracao, recrie o Grafana para instalar os plugins:
+
+```powershell
+docker compose up -d grafana loki prometheus tempo alloy
+docker compose logs --tail 100 grafana
+docker compose exec grafana grafana cli plugins ls
+```
+
+Os plugins esperados na saida sao:
+
+- `grafana-metricsdrilldown-app`
+- `grafana-lokiexplore-app`
+- `grafana-exploretraces-app`
+
+Valide tambem os datasources provisionados:
+
+```powershell
+curl.exe http://localhost:9090/-/ready
+curl.exe http://localhost:3100/ready
+curl.exe http://localhost:3200/ready
+```
+
+Na UI do Grafana, confirme que Metrics Drilldown usa o datasource `Prometheus`, Logs Drilldown usa `Loki` e Traces Drilldown usa `Tempo`. Os dashboards provisionados devem continuar abrindo normalmente.
 
 ## Validar traces localmente
 

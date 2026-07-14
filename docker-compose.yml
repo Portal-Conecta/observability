@@ -9,7 +9,8 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
       GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
-      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+      GF_PLUGINS_PREINSTALL: "grafana-metricsdrilldown-app,grafana-lokiexplore-app,grafana-exploretraces-app"
+      GF_PLUGINS_PREINSTALL_AUTO_UPDATE: "false"
     ports:
       - "${GRAFANA_PORT:-3000}:3000"
     volumes:
